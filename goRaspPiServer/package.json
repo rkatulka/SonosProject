@@ -1,0 +1,16 @@
+{
+  "name": "raspPiSonos",
+  "main": "server.js",
+  "dependencies": {
+    "bcrypt": "*",
+    "body-parser": "*",
+    "express": "*",
+    "jwt-simple": "*",
+    "mongoose": "*",
+    "morgan": "*",
+    "passport": "*",
+    "passport-jwt": "*",
+    "http-auth": "*",
+    "sonos": "*"
+  }
+}
