@@ -5,12 +5,17 @@
     "bcrypt": "*",
     "body-parser": "*",
     "express": "*",
+    "http-auth": "*",
     "jwt-simple": "*",
+    "mocha": "*",
     "mongoose": "*",
     "morgan": "*",
     "passport": "*",
     "passport-jwt": "*",
-    "http-auth": "*",
+    "q": "^1.4.1",
     "sonos": "*"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0"
   }
 }
