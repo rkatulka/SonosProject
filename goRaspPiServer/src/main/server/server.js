@@ -16,8 +16,8 @@ var basic = auth.basic({
 var SonosController = require('../classes/sonosController');
 var singleRoomFunctions = require('../helperFunctions/singleRoomFunctions');
 
-var sonos = new SonosController(s);
-sonos.discoverDevices();
+var sonosController = new SonosController(s);
+sonosController.discoverDevices();
 
 app.use(auth.connect(basic));
 
@@ -29,50 +29,36 @@ app.use(morgan('dev'));
 app.use(passport.initialize());
 
 app.get('/',function(req, res) {
-  res.send('Hello, welcome to my api!\nHere is the current speaker information: ' + sonos.getSpeakerInfo());
+  res.send('Hello, welcome to my api!\nHere is the current speaker information: ' + sonosController.getSpeakerInfo());
+});
+
+app.get('/setup', function(req, res) {
+  res.send(
+    "In order to set up this server, call /setup/setupSpeakers.  If you would like to rediscover your speakers, call /setup/rediscover and then /setup/setupSpeakers.")
 });
 
 app.get('/getNumberOfSpeakers', function(req, res) {
-  res.send(sonos.getSpeakerInfo().length.toString());
+  res.send(sonosController.getSpeakerInfo().length.toString());
 });
 
 app.get('/speakerInfo', function(req, res) {
-  res.send(sonos.getSpeakerInfo());
+  res.send(sonosController.getSpeakerInfo());
 })
 
-app.get('/setupSpeakers', function(req, res) {
-  var speakers = sonos.getSpeakerInfo();
-  for (var i = 0; i < speakers.length; i++) {
-    var tempSpeaker = new s.Sonos(speakers[i].speaker.ip);
-    tempSpeaker.deviceDescription(function(err, info) {
-      console.log(info.roomName);
-      //console.log(info.friendlyName);
-      //console.log(info.serviceList.service);
-      //console.log(info.deviceList.device);
-      var ipAddr = info.friendlyName.split(' ')[0];
-      var speakers = sonos.getSpeakerInfo();
-      for(var j = 0; j < speakers.length; j++) {
-        if(ipAddr == speakers[j].speaker.ip) {
-          speakers[j].speaker.name = info.roomName;
-        }
-      }
-    });
-  }
+app.get('/setup/rediscover', function(req, res) {
+  sonosController.discoverDevices();
+  res.send('Speakers found!');
+})
+
+app.get('/setup/setupSpeakers', function(req, res) {
+  sonosController.setSpeakerCommonNameAndGroup();
   res.send('Speakers set up!');
 });
 
-/*app.get('/admin/',function(req,res) {
-  res.send('Welcome admin!');
+app.get('/action/play', function(req, res) {
+  var devicePlaying = sonosController.play('Living Room');
+  res.send('Now playing: ' + devicePlaying.name);
 });
-
-app.get('/playLivingRoom/',function(req,res) {
-  s.play(console.log);
-  res.send('nice!');
-})
-app.get('/stopLivingRoom/',function(req,res) {
-  s.stop(console.log);
-  res.send('aww man!');
-})*/
 
 app.listen(port);
 console.log('Listening on port 8000');
