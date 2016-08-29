@@ -55,8 +55,8 @@ app.get('/setup/setupSpeakers', function(req, res) {
   res.send('Speakers set up!');
 });
 
-app.get('/action/play', function(req, res) {
-  var devicePlaying = sonosController.play('Living Room');
+app.get('/action/play/:deviceSelection', function(req, res) {
+  var devicePlaying = sonosController.play(req.params.deviceSelection);
   res.send('Now playing: ' + devicePlaying.name);
 });
 

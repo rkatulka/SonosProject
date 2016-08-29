@@ -34,7 +34,6 @@ method.play = function(deviceRequest) {
   compareToRooms(deviceRequest, distances, speakers);
   compareToGroups(deviceRequest, distances, speakers);
   var smallestDifference = getSmallestDifference(distances);
-
   return smallestDifference;
 }
 
@@ -70,7 +69,7 @@ getSmallestDifference = function(distances) {
   var name = distances[0].name;
   var distance = distances[0].distance;
   for(var k = 0; k < distances.length; k++) {
-    if(Object.keys(distances)[k] < distance) {
+    if(distances[k].distance < distance) {
       distance = distances[k].distance;
       name = distances[k].name;
     }
