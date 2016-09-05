@@ -1,9 +1,5 @@
 exports.play = function(roomOrGroupToActUpon, speakers) {
-  if(roomOrGroupToActUpon.type == 'speaker') {
-    playSpeaker();
-  } else {
-    playGroup();
-  }
+  
 }
 
 exports.pause = function(roomOrGroupToActUpon, speakers) {

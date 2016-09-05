@@ -57,7 +57,7 @@ app.get('/setup/setupSpeakers', function(req, res) {
 
 app.get('/action/play/:deviceSelection', function(req, res) {
   var devicePlaying = sonosController.actionByRoomOrGroup('play', req.params.deviceSelection);
-  res.send('Now playing: ' + devicePlaying.name);
+  res.send('Now playing: ' + req.params.deviceSelection);
 });
 
 app.listen(port);

@@ -49,12 +49,9 @@ method.actionByRoomOrGroup = function(action, deviceRequest) {
   var distances = [];
   var speakers = speakerInfo;
 
-  compareToRooms(deviceRequest, distances, speakers);
-  compareToGroups(deviceRequest, distances, speakers);
-  var smallestDifference = getSmallestDifference(distances);
-  selectAction(action, smallestDifference, speakers);
-
-  return smallestDifference;
+  compareToRoomsAndGroups(deviceRequest, distances, speakers);
+  var roomOrGroupIps = getRoomOrGroupIpsWithSmallestDifference(distances, speakers);
+  selectAction(action, roomOrGroupIps);
 }
 
 /**
@@ -72,16 +69,20 @@ method.setSpeakerCommonNameAndGroup = function() {
   }
 }
 
+compareToRoomsAndGroups = function(deviceRequest, distances, speakers) {
+  compareToRooms(deviceRequest, distances, speakers);
+  compareToGroups(deviceRequest, distances, speakers);
+}
+
 /**
  * Using the Levenshtein distance, find the distance between each group and
  *   the input.
  */
 compareToRooms = function(deviceRequest, distances, speakers) {
-  var type = 'speaker';
   for(var i = 0; i < speakers.length; i++) {
     var name = speakers[i].speaker.name;
     var distance = levenshtein.getEditDistance(deviceRequest, name);
-    distances.push({ name, distance, type });
+    distances.push({ name, distance });
   }
 }
 
@@ -90,11 +91,10 @@ compareToRooms = function(deviceRequest, distances, speakers) {
  *   the input.
  */
 compareToGroups = function(deviceRequest, distances, speakers) {
-  var type = 'group';
   for(var j = 0; j < speakers.length; j++) {
     var name = speakers[j].speaker.group;
     var distance = levenshtein.getEditDistance(deviceRequest, name);
-    distances.push({ name, distance, type });
+    distances.push({ name, distance });
   }
 }
 
@@ -102,6 +102,28 @@ compareToGroups = function(deviceRequest, distances, speakers) {
  * Get the room or group with the smallest distance.  The smallest distance will
  *  indicate the room or group that is most like the input.
  */
+getRoomOrGroupIpsWithSmallestDifference = function(distances, speakers) {
+  var smallestDifference = getSmallestDifference(distances);
+  return getRoomOrGroupIps(smallestDifference, speakers);
+}
+
+getRoomOrGroupIps = function(smallestDifference, speakers) {
+  var ips = [];
+  for(var i = 0; i < speakers.length; i++) {
+    if(smallestDifference.name == speakers[i].speaker.name) {
+      var ip = speakers[i].speaker.ip
+      ips.push({ ip });
+    }
+  }
+  for(i = 0; i < speakers.length; i++) {
+    if(smallestDifference.name == speakers[i].speaker.group) {
+      var ip = speakers[i].speaker.ip;
+      ips.push({ ip });
+    }
+  }
+  return ips;
+}
+
 getSmallestDifference = function(distances) {
   var name = distances[0].name;
   var distance = distances[0].distance;
@@ -113,7 +135,7 @@ getSmallestDifference = function(distances) {
       type = distances[k].type
     }
   }
-  return { name, distance, type };
+  return { name, distance };
 }
 
 /**
@@ -130,10 +152,10 @@ addRoomNameToSpeakerInfo = function(info, sonosController) {
   }
 }
 
-selectAction = function(action, roomOrGroupToActUpon, speakers) {
+selectAction = function(action, roomOrGroupIps) {
   switch(action)  {
     case 'play':
-      actions.play(roomOrGroupToActUpon, speakers);
+      console.log(roomOrGroupIps);
       break;
     case 'pause':
       actions.pause(roomOrGroupToActUpon, speakers);
