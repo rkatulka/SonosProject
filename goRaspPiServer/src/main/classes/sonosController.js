@@ -8,6 +8,8 @@ var speakerInfo = [];
 /**
  * The constructor which will initialize the sonos library, speakerInfo and the
  *   lastPlayedDevices.
+ *
+ * @param sonos - The library needed to perform an action on a speaker
  */
 function SonosController(sonos) {
   this._sonos = sonos;
@@ -18,6 +20,8 @@ function SonosController(sonos) {
 /**
  * Returns the list of speakers.  If none were discovered, then it will return
  *   an empty JSON.
+ *
+ * @return speakerInfo - The name, ip and group of all of the speakers
  */
 method.getSpeakerInfo = function() {
   return speakerInfo;
@@ -42,17 +46,17 @@ method.discoverDevices = function() {
 }
 
 /**
- * Play a speaker or a group of speakers.  This will choose based on the input
- *   that matches the closest room or group.
+ *
  */
 method.actionByRoomOrGroup = function(action, deviceRequest) {
   var distances = [];
   var speakers = speakerInfo;
+  var sonos = this._sonos;
 
-  compareToRooms(deviceRequest, distances, speakers);
-  compareToGroups(deviceRequest, distances, speakers);
+  compareRequestToRooms(deviceRequest, distances, speakers);
+  compareRequestToGroups(deviceRequest, distances, speakers);
   var smallestDifference = getSmallestDifference(distances);
-  selectAction(action, smallestDifference, speakers);
+  selectAction(sonos, action, smallestDifference, speakers);
 
   return smallestDifference;
 }
@@ -76,7 +80,7 @@ method.setSpeakerCommonNameAndGroup = function() {
  * Using the Levenshtein distance, find the distance between each group and
  *   the input.
  */
-compareToRooms = function(deviceRequest, distances, speakers) {
+compareRequestToRooms = function(deviceRequest, distances, speakers) {
   var type = 'speaker';
   for(var i = 0; i < speakers.length; i++) {
     var name = speakers[i].speaker.name;
@@ -89,7 +93,7 @@ compareToRooms = function(deviceRequest, distances, speakers) {
  * Using the Levenshtein distance, find the distance between each group and
  *   the input.
  */
-compareToGroups = function(deviceRequest, distances, speakers) {
+compareRequestToGroups = function(deviceRequest, distances, speakers) {
   var type = 'group';
   for(var j = 0; j < speakers.length; j++) {
     var name = speakers[j].speaker.group;
@@ -110,7 +114,7 @@ getSmallestDifference = function(distances) {
     if(distances[k].distance < distance) {
       distance = distances[k].distance;
       name = distances[k].name;
-      type = distances[k].type
+      type = distances[k].type;
     }
   }
   return { name, distance, type };
@@ -130,16 +134,16 @@ addRoomNameToSpeakerInfo = function(info, sonosController) {
   }
 }
 
-selectAction = function(action, roomOrGroupToActUpon, speakers) {
+selectAction = function(sonos, action, roomOrGroupToActUpon, speakers) {
   switch(action)  {
     case 'play':
-      actions.play(roomOrGroupToActUpon, speakers);
+      actions.play(sonos, roomOrGroupToActUpon, speakers);
       break;
     case 'pause':
-      actions.pause(roomOrGroupToActUpon, speakers);
+      actions.pause(sonos, roomOrGroupToActUpon, speakers);
       break;
     case 'stop':
-      actions.stop(roomOrGroupToActUpon, speakers);
+      actions.stop(sonos, roomOrGroupToActUpon, speakers);
       break;
     default:
       return 'Invalid';
